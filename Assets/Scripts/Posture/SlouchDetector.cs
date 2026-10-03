@@ -72,6 +72,7 @@ namespace Mudatti.Posture
     public bool Paused { get; set; }
     public float[] Baseline => (float[])_baseline.Clone();
     public float SlouchPercent => _overallPercent;
+    public float SlouchThreshold => slouchThreshold;
     public bool IsCalibrated => _isCalibrated;
     public bool IsCalibrating => _isCalibrating;
     public float CalibrationProgress => calibrationSeconds > 0f ? Mathf.Clamp01(_calibrationElapsed / calibrationSeconds) : 1f;

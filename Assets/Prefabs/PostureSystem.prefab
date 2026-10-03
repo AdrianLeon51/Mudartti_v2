@@ -70,7 +70,7 @@ MonoBehaviour:
   minCalibrationLegRatio: 1.2
   maxDelta:
   - 0.35
-  - 0.15
+  - 0.1
   - 0.4
   - 0.3
   weights:
@@ -99,7 +99,7 @@ MonoBehaviour:
   minVisibility: 0.5
   fallbackStandingRatio: 1.7
   minBaselineRatio: 1.2
-  crouchEnter: 0.65
+  crouchEnter: 0.6
   crouchExit: 0.75
   standEnter: 0.85
   standExit: 0.8
@@ -121,8 +121,8 @@ MonoBehaviour:
   slouchDetector: {fileID: 3604801572638295733}
   crouchTracker: {fileID: 2175239499615478578}
   loadSavedCalibration: 1
-  standSettleSeconds: 1
-  checkpointHoldSeconds: 0.5
+  standSettleSeconds: 0.5
+  checkpointHoldSeconds: 0.3
   trackingLostSeconds: 1
 --- !u!114 &3998248007878408079
 MonoBehaviour:

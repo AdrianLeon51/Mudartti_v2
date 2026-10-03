@@ -17,7 +17,9 @@ namespace Mudatti.Game
       {
         return;
       }
-      var desired = target.position + offset;
+      // Offset follows the target's heading so the camera stays behind it around curves.
+      var heading = Quaternion.Euler(0f, target.eulerAngles.y, 0f);
+      var desired = target.position + heading * offset;
       var alpha = followSeconds > 0f ? 1f - Mathf.Exp(-Time.deltaTime / followSeconds) : 1f;
       transform.position = Vector3.Lerp(transform.position, desired, alpha);
       transform.LookAt(target.position + lookAtOffset);

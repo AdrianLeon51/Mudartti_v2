@@ -52,6 +52,10 @@ namespace Mudatti.Interaction
 
     private void OnEnable()
     {
+      if (feed == null)
+      {
+        feed = FindFirstObjectByType<PoseLandmarkFeed>();
+      }
       if (feed != null)
       {
         feed.FrameUpdated += HandleFrame;
@@ -153,7 +157,7 @@ namespace Mudatti.Interaction
         return;
       }
 
-      var alpha = smoothingSeconds > 0f ? 1f - Mathf.Exp(-Time.deltaTime / smoothingSeconds) : 1f;
+      var alpha = smoothingSeconds > 0f ? 1f - Mathf.Exp(-Time.unscaledDeltaTime / smoothingSeconds) : 1f;
       _screenPosition = Vector2.Lerp(_screenPosition, _targetScreenPosition, alpha);
       SetCursorVisible(true);
       MoveCursor(_screenPosition);
@@ -187,7 +191,7 @@ namespace Mudatti.Interaction
       {
         ResetDwell(hit);
       }
-      _dwellElapsed += Time.deltaTime;
+      _dwellElapsed += Time.unscaledDeltaTime;
       SetRing(dwellSeconds > 0f ? _dwellElapsed / dwellSeconds : 1f);
 
       if (_dwellElapsed >= dwellSeconds)
