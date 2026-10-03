@@ -19,6 +19,12 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 
     public readonly PoseLandmarkDetectionConfig config = new PoseLandmarkDetectionConfig();
 
+    /// <summary>
+    ///   Raised for every successful detection. In LIVE_STREAM mode this is invoked on a background thread,
+    ///   and the result is only valid during the call, so listeners must copy what they need.
+    /// </summary>
+    public event System.Action<PoseLandmarkerResult> OnPoseResult;
+
     public override void Stop()
     {
       base.Stop();
@@ -134,6 +140,7 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
             if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
             {
               _poseLandmarkerResultAnnotationController.DrawNow(result);
+              OnPoseResult?.Invoke(result);
             }
             else
             {
@@ -145,6 +152,7 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
             if (taskApi.TryDetectForVideo(image, GetCurrentTimestampMillisec(), imageProcessingOptions, ref result))
             {
               _poseLandmarkerResultAnnotationController.DrawNow(result);
+              OnPoseResult?.Invoke(result);
             }
             else
             {
@@ -162,6 +170,7 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
     private void OnPoseLandmarkDetectionOutput(PoseLandmarkerResult result, Image image, long timestamp)
     {
       _poseLandmarkerResultAnnotationController.DrawLater(result);
+      OnPoseResult?.Invoke(result);
       DisposeAllMasks(result);
     }
 
