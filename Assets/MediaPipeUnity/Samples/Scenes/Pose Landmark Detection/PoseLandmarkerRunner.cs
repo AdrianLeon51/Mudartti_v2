@@ -28,15 +28,15 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 
     protected override IEnumerator Run()
     {
-      Debug.Log($"Delegate = {config.Delegate}");
-      Debug.Log($"Image Read Mode = {config.ImageReadMode}");
-      Debug.Log($"Model = {config.ModelName}");
-      Debug.Log($"Running Mode = {config.RunningMode}");
-      Debug.Log($"NumPoses = {config.NumPoses}");
-      Debug.Log($"MinPoseDetectionConfidence = {config.MinPoseDetectionConfidence}");
-      Debug.Log($"MinPosePresenceConfidence = {config.MinPosePresenceConfidence}");
-      Debug.Log($"MinTrackingConfidence = {config.MinTrackingConfidence}");
-      Debug.Log($"OutputSegmentationMasks = {config.OutputSegmentationMasks}");
+      // Debug.Log($"Delegate = {config.Delegate}");
+      // Debug.Log($"Image Read Mode = {config.ImageReadMode}");
+      // Debug.Log($"Model = {config.ModelName}");
+      // Debug.Log($"Running Mode = {config.RunningMode}");
+      // Debug.Log($"NumPoses = {config.NumPoses}");
+      // Debug.Log($"MinPoseDetectionConfidence = {config.MinPoseDetectionConfidence}");
+      // Debug.Log($"MinPosePresenceConfidence = {config.MinPosePresenceConfidence}");
+      // Debug.Log($"MinTrackingConfidence = {config.MinTrackingConfidence}");
+      // Debug.Log($"OutputSegmentationMasks = {config.OutputSegmentationMasks}");
 
       yield return AssetLoader.PrepareAssetAsync(config.ModelPath);
 
@@ -167,10 +167,10 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 
       // Check if user is crouching
       bool isCrouching = crouchDetector.IsCrouched(result);
-      if (isCrouching)
-      {
-        Debug.LogWarning("Player is crouched!");
-      }
+      // if (isCrouching)
+      // {
+      //   Debug.LogWarning("Player is crouched!");
+      // }
 
       DisposeAllMasks(result);
     }
