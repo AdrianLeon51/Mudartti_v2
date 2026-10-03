@@ -1,5 +1,6 @@
 using Mudatti.Posture;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Mudatti.Calibration
@@ -18,6 +19,10 @@ namespace Mudatti.Calibration
     [SerializeField] private Button startButton;
     [SerializeField] private Text buttonLabel;
     [SerializeField] private Text instructions;
+    [Tooltip("Shown once calibration succeeds; loads the play scene.")]
+    [SerializeField] private Button playButton;
+    [Tooltip("Must be listed in Build Settings.")]
+    [SerializeField] private string playSceneName = "Adri_WalkTest";
 
     [SerializeField] private float countdownSeconds = 2f;
 
@@ -27,6 +32,7 @@ namespace Mudatti.Calibration
     private void OnEnable()
     {
       startButton.onClick.AddListener(OnStartPressed);
+      playButton.onClick.AddListener(OnPlayPressed);
       slouchDetector.Calibrated += OnCalibrated;
       EnterIdle();
     }
@@ -34,7 +40,16 @@ namespace Mudatti.Calibration
     private void OnDisable()
     {
       startButton.onClick.RemoveListener(OnStartPressed);
+      playButton.onClick.RemoveListener(OnPlayPressed);
       slouchDetector.Calibrated -= OnCalibrated;
+    }
+
+    private void OnPlayPressed()
+    {
+      if (_state == State.Done)
+      {
+        SceneManager.LoadScene(playSceneName);
+      }
     }
 
     private void OnStartPressed()
@@ -46,6 +61,7 @@ namespace Mudatti.Calibration
       _state = State.Countdown;
       _countdownEndTime = Time.time + countdownSeconds;
       startButton.gameObject.SetActive(false);
+      playButton.gameObject.SetActive(false);
       if (postureTracker != null)
       {
         postureTracker.SetMode(PostureGameMode.Idle);
@@ -61,6 +77,7 @@ namespace Mudatti.Calibration
       _state = State.Done;
       buttonLabel.text = "Recalibrate";
       startButton.gameObject.SetActive(true);
+      playButton.gameObject.SetActive(true);
       if (postureTracker != null)
       {
         postureTracker.SetMode(PostureGameMode.Running);
@@ -72,6 +89,7 @@ namespace Mudatti.Calibration
       _state = State.Idle;
       buttonLabel.text = "Start calibration";
       startButton.gameObject.SetActive(true);
+      playButton.gameObject.SetActive(false);
     }
 
     private void Update()
