@@ -4,6 +4,7 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+using System;
 using System.Collections;
 using Mediapipe.Tasks.Vision.PoseLandmarker;
 using UnityEngine;
@@ -13,6 +14,14 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 {
   public class PoseLandmarkerRunner : VisionTaskApiRunner<PoseLandmarker>
   {
+    enum PlayerState
+    {
+      Normal,
+      Crouched,
+      Leaning
+    }
+    private PlayerState currentState = PlayerState.Normal;
+    
     [SerializeField] private PoseLandmarkerResultAnnotationController _poseLandmarkerResultAnnotationController;
 
     private Experimental.TextureFramePool _textureFramePool;
@@ -165,12 +174,24 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
     {
       _poseLandmarkerResultAnnotationController.DrawLater(result);
 
+      PlayerState newState = PlayerState.Normal;
+      
       // Check if user is crouching
       bool isCrouching = crouchDetector.IsCrouched(result);
-      // if (isCrouching)
+      if (isCrouching)
+      {
+        newState = PlayerState.Crouched;
+        //Debug.LogWarning("Player is crouched!");
+      }
+      
+      //verify leaning
+      // if (isLeaning)
       // {
-      //   Debug.LogWarning("Player is crouched!");
+      //   newState = PlayerState.Leaning;
+      //   //Debug.LogWarning("Player is Leaning!");
       // }
+      
+      currentState = newState;
 
       DisposeAllMasks(result);
     }
