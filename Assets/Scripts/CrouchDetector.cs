@@ -1,11 +1,13 @@
+using System;
 using Mediapipe.Tasks.Vision.PoseLandmarker;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class CrouchDetector : MonoBehaviour
 {
     [Header("Thresholds")]
     [Tooltip("Ratio of hip-to-ankle distance relative to shoulder-to-hip distance. Lower values mean crouched.")]
-    [SerializeField] private float crouchThreshold = 0.6f;
+    private float crouchThreshold = 0.9f;
 
     /// <summary>
     /// Checks if the pose result indicates a crouch.
@@ -32,7 +34,7 @@ public class CrouchDetector : MonoBehaviour
         var rightShoulder = landmarks[12];
 
         // Ensure visibility/presence confidence if needed (optional check)
-        // if (leftHip.Visibility < 0.5f || rightHip.Visibility < 0.5f) return false;
+        if (leftHip.visibility < 0.5f || rightHip.visibility < 0.5f) return false;
 
         // Calculate average Y positions (remember: lower Y value is higher up on the screen)
         float avgHipY = (leftHip.y + rightHip.y) / 2f;
@@ -48,11 +50,24 @@ public class CrouchDetector : MonoBehaviour
         // Compute leg extension or hip height relative to ankles
         // Standing: hips are far above ankles. Crouching: hips approach knee/ankle level.
         float hipToAnkleDistance = Mathf.Abs(avgAnkleY - avgHipY);
-        
+
         // Alternative ratio approach: Ratio of hip height compared to total leg length or torso height
         float crouchRatio = hipToAnkleDistance / torsoHeight;
 
         // If the distance shrinks below your threshold, they are crouching
         return crouchRatio < crouchThreshold;
     }
+
+    // private float crouchRatio = float.NaN;
+    //
+    // private void Update()
+    // {
+    //     if (crouchRatio != float.NaN)
+    //     {
+    //         if (Random.Range(0,200) == 1)
+    //         {
+    //             Debug.Log("crouchRatio: " + crouchRatio);
+    //         }
+    //     }
+    // }
 }
