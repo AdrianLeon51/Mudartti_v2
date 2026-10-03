@@ -148,7 +148,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a3e037477b03354096990a544deb799, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrouchDetector
-  crouchThreshold: 0.6
 --- !u!4 &130053723
 Transform:
   m_ObjectHideFlags: 0
