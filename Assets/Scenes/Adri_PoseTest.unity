@@ -433,6 +433,8 @@ GameObject:
   - component: {fileID: 1064799468}
   - component: {fileID: 1064799469}
   - component: {fileID: 1064799470}
+  - component: {fileID: 1064799472}
+  - component: {fileID: 1064799471}
   m_Layer: 0
   m_Name: Solution
   m_TagString: Untagged
@@ -471,6 +473,7 @@ MonoBehaviour:
   screen: {fileID: 1006057043}
   runningMode: 0
   _poseLandmarkerResultAnnotationController: {fileID: 1006057044}
+  crouchDetector: {fileID: 0}
 --- !u!114 &1064799469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -517,6 +520,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PoseLandmarkFeed
   runner: {fileID: 1064799468}
+--- !u!114 &1064799471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064799459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c42b22962dcaa9b43bbfe52ac8fcca5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.CrouchMonitor
+  runner: {fileID: 1064799468}
+  crouchDetector: {fileID: 1064799472}
+  showDebugOverlay: 1
+  overlayPosition: {x: 10, y: 420}
+--- !u!114 &1064799472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064799459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a3e037477b03354096990a544deb799, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CrouchDetector
+  crouchThreshold: 0.6
 --- !u!224 &1229135957 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3259285889726014650, guid: 5713b959e3c77a58fb258133fc8e4aef, type: 3}
