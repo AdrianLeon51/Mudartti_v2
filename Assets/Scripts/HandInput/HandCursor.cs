@@ -33,6 +33,9 @@ namespace Mudatti.Interaction
     [SerializeField] private float reachUp = 1.5f;
     [SerializeField] private float reachDown = 1f;
 
+    [Tooltip("Optional. The reach box maps onto this rectangle instead of the whole screen, so the cursor never leaves it.")]
+    [SerializeField] private RectTransform activeArea;
+
     [Header("Click")]
     [SerializeField] private float dwellSeconds = 1.5f;
 
@@ -85,13 +88,30 @@ namespace Mudatti.Interaction
       }
       // Image y grows downwards, screen y grows upwards.
       var y = 1f - Mathf.InverseLerp(-reachUp, reachDown, offset.y);
-      _targetScreenPosition = new Vector2(x * UnityEngine.Screen.width, y * UnityEngine.Screen.height);
+      var area = GetActiveScreenRect();
+      _targetScreenPosition = new Vector2(Mathf.Lerp(area.xMin, area.xMax, x), Mathf.Lerp(area.yMin, area.yMax, y));
 
       if (!_hasPosition)
       {
         _screenPosition = _targetScreenPosition;
         _hasPosition = true;
       }
+    }
+
+    private readonly Vector3[] _corners = new Vector3[4];
+
+    private Rect GetActiveScreenRect()
+    {
+      if (activeArea == null)
+      {
+        return new Rect(0f, 0f, UnityEngine.Screen.width, UnityEngine.Screen.height);
+      }
+      var canvas = activeArea.GetComponentInParent<Canvas>();
+      var cam = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+      activeArea.GetWorldCorners(_corners);
+      var min = RectTransformUtility.WorldToScreenPoint(cam, _corners[0]);
+      var max = RectTransformUtility.WorldToScreenPoint(cam, _corners[2]);
+      return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
     }
 
     private int PickHand(PoseFrame frame)
