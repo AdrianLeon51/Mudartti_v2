@@ -34,15 +34,15 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 
     protected override IEnumerator Run()
     {
-      Debug.Log($"Delegate = {config.Delegate}");
-      Debug.Log($"Image Read Mode = {config.ImageReadMode}");
-      Debug.Log($"Model = {config.ModelName}");
-      Debug.Log($"Running Mode = {config.RunningMode}");
-      Debug.Log($"NumPoses = {config.NumPoses}");
-      Debug.Log($"MinPoseDetectionConfidence = {config.MinPoseDetectionConfidence}");
-      Debug.Log($"MinPosePresenceConfidence = {config.MinPosePresenceConfidence}");
-      Debug.Log($"MinTrackingConfidence = {config.MinTrackingConfidence}");
-      Debug.Log($"OutputSegmentationMasks = {config.OutputSegmentationMasks}");
+      // Debug.Log($"Delegate = {config.Delegate}");
+      // Debug.Log($"Image Read Mode = {config.ImageReadMode}");
+      // Debug.Log($"Model = {config.ModelName}");
+      // Debug.Log($"Running Mode = {config.RunningMode}");
+      // Debug.Log($"NumPoses = {config.NumPoses}");
+      // Debug.Log($"MinPoseDetectionConfidence = {config.MinPoseDetectionConfidence}");
+      // Debug.Log($"MinPosePresenceConfidence = {config.MinPosePresenceConfidence}");
+      // Debug.Log($"MinTrackingConfidence = {config.MinTrackingConfidence}");
+      // Debug.Log($"OutputSegmentationMasks = {config.OutputSegmentationMasks}");
 
       yield return AssetLoader.PrepareAssetAsync(config.ModelPath);
 
@@ -166,11 +166,25 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
         }
       }
     }
+    
+    [SerializeField] private CrouchDetector crouchDetector;
 
     private void OnPoseLandmarkDetectionOutput(PoseLandmarkerResult result, Image image, long timestamp)
     {
       _poseLandmarkerResultAnnotationController.DrawLater(result);
       OnPoseResult?.Invoke(result);
+
+      // Check if user is crouching. Not every scene assigns a CrouchDetector; a managed null check
+      // is used because this runs on a background thread.
+      if (crouchDetector is not null)
+      {
+        bool isCrouching = crouchDetector.IsCrouched(result);
+        // if (isCrouching)
+        // {
+        //   Debug.LogWarning("Player is crouched!");
+        // }
+      }
+
       DisposeAllMasks(result);
     }
 
