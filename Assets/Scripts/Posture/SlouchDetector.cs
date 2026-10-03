@@ -1,6 +1,4 @@
-using Mediapipe.Tasks.Vision.PoseLandmarker;
-using Mediapipe.Unity.Sample;
-using Mediapipe.Unity.Sample.PoseLandmarkDetection;
+using System;
 using UnityEngine;
 
 namespace Mudatti.Posture
@@ -16,7 +14,6 @@ namespace Mudatti.Posture
     private const int LeftShoulder = 11, RightShoulder = 12;
     private const int LeftHip = 23, RightHip = 24;
     private const int LeftAnkle = 27, RightAnkle = 28;
-    private const int LandmarkCount = 33;
 
     private const int HeadDrop = 0, TorsoShortening = 1, HeadForward = 2, TrunkLean = 3;
     private const int MetricCount = 4;
@@ -24,7 +21,7 @@ namespace Mudatti.Posture
     // +1: metric grows when slouching, -1: metric shrinks when slouching
     private static readonly float[] SlouchDirection = { -1f, -1f, 1f, 1f };
 
-    [SerializeField] private PoseLandmarkerRunner runner;
+    [SerializeField] private PoseLandmarkFeed feed;
 
     [Header("Validity")]
     [SerializeField, Range(0f, 1f)] private float minVisibility = 0.5f;
@@ -33,6 +30,8 @@ namespace Mudatti.Posture
     [SerializeField] private float maxShoulderDepthRatio = 0.6f;
 
     [Header("Calibration")]
+    [Tooltip("Start calibrating as soon as a valid pose is seen. Disable to wait for StartCalibration().")]
+    [SerializeField] private bool autoCalibrate = true;
     [SerializeField] private float calibrationSeconds = 3f;
 
     [Header("Scoring (index: head drop, torso, head forward, trunk lean)")]
@@ -45,15 +44,9 @@ namespace Mudatti.Posture
     [SerializeField, Range(0f, 100f)] private float slouchThreshold = 35f;
     [SerializeField] private float slouchHoldSeconds = 2f;
 
-    // Written by the detection thread, read on the main thread under _lock.
-    private readonly object _lock = new object();
-    private readonly Vector3[] _sharedImage = new Vector3[LandmarkCount]; // x, y normalized; z = visibility
-    private readonly Vector3[] _sharedWorld = new Vector3[LandmarkCount];
-    private bool _hasNewFrame;
-    private bool _sharedHasPose;
-
-    private readonly Vector3[] _image = new Vector3[LandmarkCount];
-    private readonly Vector3[] _world = new Vector3[LandmarkCount];
+    [Header("Debug overlay")]
+    [SerializeField] private bool showDebugOverlay = true;
+    [SerializeField] private bool showRecalibrateButton = true;
 
     private readonly float[] _raw = new float[MetricCount];
     private readonly float[] _baseline = new float[MetricCount];
@@ -61,6 +54,7 @@ namespace Mudatti.Posture
     private readonly float[] _percent = new float[MetricCount];
     private float _calibrationElapsed;
     private bool _isCalibrated;
+    private bool _isCalibrating;
 
     private float _overallPercent;
     private float _lastSampleTime = -1f;
@@ -68,95 +62,73 @@ namespace Mudatti.Posture
     private string _status = "Waiting for camera";
     private GUIStyle _style;
 
+    public event Action Calibrated;
+
     public float SlouchPercent => _overallPercent;
     public bool IsCalibrated => _isCalibrated;
+    public bool IsCalibrating => _isCalibrating;
+    public float CalibrationProgress => calibrationSeconds > 0f ? Mathf.Clamp01(_calibrationElapsed / calibrationSeconds) : 1f;
+    public bool IsSlouching => _isCalibrated && _aboveThresholdSince >= 0f && Time.time - _aboveThresholdSince >= slouchHoldSeconds;
+    public string Status => _status;
 
     private void OnEnable()
     {
-      if (runner != null)
+      if (feed != null)
       {
-        runner.OnPoseResult += HandlePoseResult;
+        feed.FrameUpdated += HandleFrame;
       }
     }
 
     private void OnDisable()
     {
-      if (runner != null)
+      if (feed != null)
       {
-        runner.OnPoseResult -= HandlePoseResult;
+        feed.FrameUpdated -= HandleFrame;
       }
     }
 
-    public void Recalibrate()
+    /// <summary>Discards the current baseline and records a new one from the next valid frames.</summary>
+    public void StartCalibration()
     {
       _isCalibrated = false;
+      _isCalibrating = true;
       _calibrationElapsed = 0f;
-      System.Array.Clear(_calibrationSum, 0, MetricCount);
-      System.Array.Clear(_percent, 0, MetricCount);
+      Array.Clear(_calibrationSum, 0, MetricCount);
+      Array.Clear(_percent, 0, MetricCount);
       _overallPercent = 0f;
       _aboveThresholdSince = -1f;
     }
 
-    // May run on a background thread (LIVE_STREAM), so only copy data here.
-    private void HandlePoseResult(PoseLandmarkerResult result)
+    private void HandleFrame(PoseFrame frame)
     {
-      lock (_lock)
-      {
-        _hasNewFrame = true;
-        _sharedHasPose = result.poseLandmarks != null && result.poseLandmarks.Count > 0
-          && result.poseWorldLandmarks != null && result.poseWorldLandmarks.Count > 0
-          && result.poseLandmarks[0].landmarks.Count >= LandmarkCount
-          && result.poseWorldLandmarks[0].landmarks.Count >= LandmarkCount;
-        if (!_sharedHasPose)
-        {
-          return;
-        }
-
-        var image = result.poseLandmarks[0].landmarks;
-        var world = result.poseWorldLandmarks[0].landmarks;
-        for (var i = 0; i < LandmarkCount; i++)
-        {
-          _sharedImage[i] = new Vector3(image[i].x, image[i].y, image[i].visibility ?? 1f);
-          _sharedWorld[i] = new Vector3(world[i].x, world[i].y, world[i].z);
-        }
-      }
-    }
-
-    private void Update()
-    {
-      bool hasPose;
-      lock (_lock)
-      {
-        if (!_hasNewFrame)
-        {
-          return;
-        }
-        _hasNewFrame = false;
-        hasPose = _sharedHasPose;
-        if (hasPose)
-        {
-          System.Array.Copy(_sharedImage, _image, LandmarkCount);
-          System.Array.Copy(_sharedWorld, _world, LandmarkCount);
-        }
-      }
-
       var now = Time.time;
       var dt = _lastSampleTime < 0f ? 0f : now - _lastSampleTime;
       _lastSampleTime = now;
 
-      if (!hasPose)
+      if (!frame.HasPose)
       {
         _status = "No person";
         return;
       }
-      if (!TryComputeMetrics(out _status))
+      if (!TryComputeMetrics(frame, out _status))
       {
         return;
       }
 
       if (!_isCalibrated)
       {
-        Calibrate(dt);
+        if (!_isCalibrating && autoCalibrate)
+        {
+          StartCalibration();
+        }
+        if (_isCalibrating)
+        {
+          Calibrate(dt);
+        }
+        else
+        {
+          _status = "Waiting to calibrate";
+        }
         return;
       }
 
@@ -164,47 +136,45 @@ namespace Mudatti.Posture
       _status = "Tracking";
     }
 
-    private bool TryComputeMetrics(out string status)
+    private bool TryComputeMetrics(PoseFrame frame, out string status)
     {
-      if (!IsVisible(LeftEar) || !IsVisible(RightEar) || !IsVisible(LeftShoulder) || !IsVisible(RightShoulder)
-        || !IsVisible(LeftHip) || !IsVisible(RightHip))
+      bool Visible(int i) => frame.IsVisible(i, minVisibility);
+
+      if (!Visible(LeftEar) || !Visible(RightEar) || !Visible(LeftShoulder) || !Visible(RightShoulder)
+        || !Visible(LeftHip) || !Visible(RightHip))
       {
         status = "Upper body not visible";
         return false;
       }
-      if (requireFullBody && (!IsVisible(LeftAnkle) || !IsVisible(RightAnkle)))
+      if (requireFullBody && (!Visible(LeftAnkle) || !Visible(RightAnkle)))
       {
         status = "Not full body (ankles hidden)";
         return false;
       }
 
-      var worldShoulderWidth = Vector3.Distance(_world[LeftShoulder], _world[RightShoulder]);
+      var world = frame.World;
+      var worldShoulderWidth = Vector3.Distance(world[LeftShoulder], world[RightShoulder]);
       if (worldShoulderWidth < 1e-4f
-        || Mathf.Abs(_world[LeftShoulder].z - _world[RightShoulder].z) / worldShoulderWidth > maxShoulderDepthRatio)
+        || Mathf.Abs(world[LeftShoulder].z - world[RightShoulder].z) / worldShoulderWidth > maxShoulderDepthRatio)
       {
         status = "Not facing camera";
         return false;
       }
 
-      // Normalized image coords are scaled per axis, so convert to pixels before comparing distances.
-      var source = ImageSourceProvider.ImageSource;
-      var width = source != null && source.textureWidth > 0 ? source.textureWidth : 1f;
-      var height = source != null && source.textureHeight > 0 ? source.textureHeight : 1f;
-      Vector2 Px(int i) => new Vector2(_image[i].x * width, _image[i].y * height);
-
-      var shoulderWidth = Vector2.Distance(Px(LeftShoulder), Px(RightShoulder));
+      var px = frame.Pixel;
+      var shoulderWidth = Vector2.Distance(px[LeftShoulder], px[RightShoulder]);
       if (shoulderWidth < 1f)
       {
         status = "Shoulders too close together";
         return false;
       }
 
-      var earMid = (Px(LeftEar) + Px(RightEar)) * 0.5f;
-      var shoulderMid = (Px(LeftShoulder) + Px(RightShoulder)) * 0.5f;
-      var hipMid = (Px(LeftHip) + Px(RightHip)) * 0.5f;
-      var earMidZ = (_world[LeftEar].z + _world[RightEar].z) * 0.5f;
-      var shoulderMidZ = (_world[LeftShoulder].z + _world[RightShoulder].z) * 0.5f;
-      var hipMidZ = (_world[LeftHip].z + _world[RightHip].z) * 0.5f;
+      var earMid = (px[LeftEar] + px[RightEar]) * 0.5f;
+      var shoulderMid = (px[LeftShoulder] + px[RightShoulder]) * 0.5f;
+      var hipMid = (px[LeftHip] + px[RightHip]) * 0.5f;
+      var earMidZ = (world[LeftEar].z + world[RightEar].z) * 0.5f;
+      var shoulderMidZ = (world[LeftShoulder].z + world[RightShoulder].z) * 0.5f;
+      var hipMidZ = (world[LeftHip].z + world[RightHip].z) * 0.5f;
 
       // Image y grows downwards; world z is smaller when closer to the camera.
       _raw[HeadDrop] = (shoulderMid.y - earMid.y) / shoulderWidth;
@@ -216,8 +186,6 @@ namespace Mudatti.Posture
       return true;
     }
 
-    private bool IsVisible(int index) => _image[index].z >= minVisibility;
-
     private void Calibrate(float dt)
     {
       for (var i = 0; i < MetricCount; i++)
@@ -225,7 +193,7 @@ namespace Mudatti.Posture
         _calibrationSum[i] += _raw[i] * dt;
       }
       _calibrationElapsed += dt;
-      _status = $"Calibrating - stand up straight ({Mathf.Clamp01(_calibrationElapsed / calibrationSeconds) * 100f:0}%)";
+      _status = $"Calibrating - stand up straight ({CalibrationProgress * 100f:0}%)";
 
       if (_calibrationElapsed >= calibrationSeconds)
       {
@@ -234,6 +202,8 @@ namespace Mudatti.Posture
           _baseline[i] = _calibrationSum[i] / _calibrationElapsed;
         }
         _isCalibrated = true;
+        _isCalibrating = false;
+        Calibrated?.Invoke();
       }
     }
 
@@ -270,6 +240,10 @@ namespace Mudatti.Posture
 
     private void OnGUI()
     {
+      if (!showDebugOverlay)
+      {
+        return;
+      }
       _style ??= new GUIStyle(GUI.skin.label) { fontSize = 22, richText = true };
       var buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = 20 };
 
@@ -278,18 +252,17 @@ namespace Mudatti.Posture
 
       if (_isCalibrated)
       {
-        var isSlouching = _aboveThresholdSince >= 0f && Time.time - _aboveThresholdSince >= slouchHoldSeconds;
-        var color = isSlouching ? "red" : "lime";
-        GUILayout.Label($"<b>Slouch: <color={color}>{_overallPercent:0}%</color></b>{(isSlouching ? "  <color=red>SLOUCHING</color>" : "")}", _style);
+        var color = IsSlouching ? "red" : "lime";
+        GUILayout.Label($"<b>Slouch: <color={color}>{_overallPercent:0}%</color></b>{(IsSlouching ? "  <color=red>SLOUCHING</color>" : "")}", _style);
         for (var i = 0; i < MetricCount; i++)
         {
           GUILayout.Label($"{MetricNames[i]}: {_percent[i]:0}%   (now {_raw[i]:0.00} / base {_baseline[i]:0.00})", _style);
         }
       }
 
-      if (GUILayout.Button("Recalibrate", buttonStyle))
+      if (showRecalibrateButton && GUILayout.Button("Recalibrate", buttonStyle))
       {
-        Recalibrate();
+        StartCalibration();
       }
       GUILayout.EndArea();
     }
