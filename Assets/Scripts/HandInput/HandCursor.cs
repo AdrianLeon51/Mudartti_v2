@@ -24,8 +24,8 @@ namespace Mudatti.Interaction
 
     [Header("Tracking")]
     [SerializeField, Range(0f, 1f)] private float minVisibility = 0.5f;
-    [Tooltip("Flip horizontally so moving the hand to your right moves the cursor right.")]
-    [SerializeField] private bool mirrorX = true;
+    [Tooltip("Enable if moving your hand right moves the cursor left.")]
+    [SerializeField] private bool mirrorX = false;
     [SerializeField] private float smoothingSeconds = 0.1f;
 
     [Header("Reach box (in shoulder widths from the shoulder center)")]

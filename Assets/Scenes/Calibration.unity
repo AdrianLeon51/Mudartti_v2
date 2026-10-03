@@ -244,7 +244,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 48
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -524,7 +524,7 @@ MonoBehaviour:
   cursor: {fileID: 655399569}
   dwellRing: {fileID: 389870501}
   minVisibility: 0.5
-  mirrorX: 1
+  mirrorX: 0
   smoothingSeconds: 0.1
   reachHorizontal: 2
   reachUp: 1.5
@@ -1139,7 +1139,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 52
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
