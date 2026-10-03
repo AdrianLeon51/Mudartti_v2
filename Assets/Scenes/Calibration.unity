@@ -503,7 +503,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5b49f8a772fede4b82ba7f52cfb095e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Calibration.CalibrationFlow
-  slouchDetector: {fileID: 1064799469}
+  slouchDetector: {fileID: 1033063887}
+  postureTracker: {fileID: 1033063886}
   startButton: {fileID: 1264726816}
   buttonLabel: {fileID: 145516739}
   instructions: {fileID: 1409416958}
@@ -520,7 +521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 778642185f064d547a733d861abff7a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Interaction.HandCursor
-  feed: {fileID: 1064799470}
+  feed: {fileID: 1033063888}
   cursor: {fileID: 655399569}
   dwellRing: {fileID: 389870501}
   minVisibility: 0.5
@@ -757,6 +758,108 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   annotation: {fileID: 138292643}
   _visualizeZ: 0
+--- !u!1001 &1033063885
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2774476949866642603, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_Name
+      value: PostureSystem
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604801572638295733, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: autoCalibrate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3604801572638295733, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: showRecalibrateButton
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5757711386798256871, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: loadSavedCalibration
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188442241157931498, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+--- !u!114 &1033063886 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5757711386798256871, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+  m_PrefabInstance: {fileID: 1033063885}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b44c2bcde6a9f434eb904f00f3c72136, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PostureTracker
+--- !u!114 &1033063887 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3604801572638295733, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+  m_PrefabInstance: {fileID: 1033063885}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ff969b0d244894490b1fb2f6cf42b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.SlouchDetector
+--- !u!114 &1033063888 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1800343119928465175, guid: 57ba8e30aebc52e49ad7ec7a01551f28, type: 3}
+  m_PrefabInstance: {fileID: 1033063885}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d172495cbee41e4d998766a315aa502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PoseLandmarkFeed
 --- !u!1 &1064799459
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,10 +870,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1064799461}
   - component: {fileID: 1064799468}
-  - component: {fileID: 1064799469}
-  - component: {fileID: 1064799470}
-  - component: {fileID: 1064799472}
-  - component: {fileID: 1064799471}
   m_Layer: 0
   m_Name: Solution
   m_TagString: Untagged
@@ -810,81 +909,6 @@ MonoBehaviour:
   runningMode: 0
   _poseLandmarkerResultAnnotationController: {fileID: 1006057044}
   crouchDetector: {fileID: 0}
---- !u!114 &1064799469
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1064799459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39ff969b0d244894490b1fb2f6cf42b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.SlouchDetector
-  feed: {fileID: 1064799470}
-  minVisibility: 0.5
-  requireFullBody: 1
-  maxShoulderDepthRatio: 0.6
-  autoCalibrate: 0
-  calibrationSeconds: 3
-  maxDelta:
-  - 0.35
-  - 0.15
-  - 0.4
-  - 0.3
-  weights:
-  - 0.4
-  - 0.25
-  - 0.2
-  - 0.15
-  smoothingSeconds: 0.5
-  slouchThreshold: 35
-  slouchHoldSeconds: 2
-  showDebugOverlay: 1
-  showRecalibrateButton: 0
---- !u!114 &1064799470
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1064799459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d172495cbee41e4d998766a315aa502, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PoseLandmarkFeed
-  runner: {fileID: 1064799468}
---- !u!114 &1064799471
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1064799459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c42b22962dcaa9b43bbfe52ac8fcca5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.CrouchMonitor
-  runner: {fileID: 1064799468}
-  crouchDetector: {fileID: 1064799472}
-  showDebugOverlay: 1
-  overlayPosition: {x: 10, y: 420}
---- !u!114 &1064799472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1064799459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a3e037477b03354096990a544deb799, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CrouchDetector
-  crouchThreshold: 0.6
 --- !u!224 &1229135957 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3259285889726014650, guid: 5713b959e3c77a58fb258133fc8e4aef, type: 3}
@@ -1655,3 +1679,4 @@ SceneRoots:
   - {fileID: 420786856}
   - {fileID: 1064799461}
   - {fileID: 685673374}
+  - {fileID: 1033063885}

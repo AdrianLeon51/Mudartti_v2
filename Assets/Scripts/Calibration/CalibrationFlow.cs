@@ -13,6 +13,8 @@ namespace Mudatti.Calibration
     private enum State { Idle, Countdown, Calibrating, Done }
 
     [SerializeField] private SlouchDetector slouchDetector;
+    [Tooltip("Optional. Switched to Running after calibration so the live slouch % is scored.")]
+    [SerializeField] private PostureTracker postureTracker;
     [SerializeField] private Button startButton;
     [SerializeField] private Text buttonLabel;
     [SerializeField] private Text instructions;
@@ -44,6 +46,10 @@ namespace Mudatti.Calibration
       _state = State.Countdown;
       _countdownEndTime = Time.time + countdownSeconds;
       startButton.gameObject.SetActive(false);
+      if (postureTracker != null)
+      {
+        postureTracker.SetMode(PostureGameMode.Idle);
+      }
     }
 
     private void OnCalibrated()
@@ -55,6 +61,10 @@ namespace Mudatti.Calibration
       _state = State.Done;
       buttonLabel.text = "Recalibrate";
       startButton.gameObject.SetActive(true);
+      if (postureTracker != null)
+      {
+        postureTracker.SetMode(PostureGameMode.Running);
+      }
     }
 
     private void EnterIdle()

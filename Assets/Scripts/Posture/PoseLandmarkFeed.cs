@@ -43,6 +43,11 @@ namespace Mudatti.Posture
 
     private void OnEnable()
     {
+      if (runner == null)
+      {
+        // Lets the PostureSystem prefab be dropped into any pose scene without wiring.
+        runner = FindFirstObjectByType<PoseLandmarkerRunner>();
+      }
       if (runner != null)
       {
         runner.OnPoseResult += HandlePoseResult;

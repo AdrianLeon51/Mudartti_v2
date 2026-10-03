@@ -33,6 +33,8 @@ namespace Mudatti.Posture
     [Tooltip("Start calibrating as soon as a valid pose is seen. Disable to wait for StartCalibration().")]
     [SerializeField] private bool autoCalibrate = true;
     [SerializeField] private float calibrationSeconds = 3f;
+    [Tooltip("Frames whose leg ratio (hip-to-ankle / shoulder-to-hip) is below this are skipped while calibrating, so bent knees don't spoil the baseline.")]
+    [SerializeField] private float minCalibrationLegRatio = 1.2f;
 
     [Header("Scoring (index: head drop, torso, head forward, trunk lean)")]
     [Tooltip("Change from baseline (in shoulder widths) that counts as 100% slouch for each metric.")]
@@ -52,6 +54,7 @@ namespace Mudatti.Posture
     private readonly float[] _baseline = new float[MetricCount];
     private readonly float[] _calibrationSum = new float[MetricCount];
     private readonly float[] _percent = new float[MetricCount];
+    private float _legRatio = -1f;
     private float _calibrationElapsed;
     private bool _isCalibrated;
     private bool _isCalibrating;
@@ -62,8 +65,12 @@ namespace Mudatti.Posture
     private string _status = "Waiting for camera";
     private GUIStyle _style;
 
+    public event Action CalibrationStarted;
     public event Action Calibrated;
 
+    /// <summary>While paused the score is not updated: the percentage holds and the slouching flag clears.</summary>
+    public bool Paused { get; set; }
+    public float[] Baseline => (float[])_baseline.Clone();
     public float SlouchPercent => _overallPercent;
     public bool IsCalibrated => _isCalibrated;
     public bool IsCalibrating => _isCalibrating;
@@ -97,6 +104,22 @@ namespace Mudatti.Posture
       Array.Clear(_percent, 0, MetricCount);
       _overallPercent = 0f;
       _aboveThresholdSince = -1f;
+      CalibrationStarted?.Invoke();
+    }
+
+    /// <summary>Restores a previously saved baseline (see <see cref="PostureCalibrationData"/>).</summary>
+    public void ApplyBaseline(float[] baseline)
+    {
+      if (baseline == null || baseline.Length != MetricCount)
+      {
+        return;
+      }
+      Array.Copy(baseline, _baseline, MetricCount);
+      Array.Clear(_percent, 0, MetricCount);
+      _overallPercent = 0f;
+      _aboveThresholdSince = -1f;
+      _isCalibrating = false;
+      _isCalibrated = true;
     }
 
     private void HandleFrame(PoseFrame frame)
@@ -123,12 +146,24 @@ namespace Mudatti.Posture
         }
         if (_isCalibrating)
         {
+          if (_legRatio >= 0f && _legRatio < minCalibrationLegRatio)
+          {
+            _status = "Calibrating - stand up straight";
+            return;
+          }
           Calibrate(dt);
         }
         else
         {
           _status = "Waiting to calibrate";
         }
+        return;
+      }
+
+      if (Paused)
+      {
+        _aboveThresholdSince = -1f;
+        _status = "Paused";
         return;
       }
 
@@ -181,6 +216,11 @@ namespace Mudatti.Posture
       _raw[TorsoShortening] = (hipMid.y - shoulderMid.y) / shoulderWidth;
       _raw[HeadForward] = (shoulderMidZ - earMidZ) / worldShoulderWidth;
       _raw[TrunkLean] = (hipMidZ - shoulderMidZ) / worldShoulderWidth;
+
+      // Leg ratio, used only to reject bent-knee frames during calibration (-1 when ankles aren't visible).
+      _legRatio = Visible(LeftAnkle) && Visible(RightAnkle) && hipMid.y - shoulderMid.y > 1f
+        ? ((px[LeftAnkle].y + px[RightAnkle].y) * 0.5f - hipMid.y) / (hipMid.y - shoulderMid.y)
+        : -1f;
 
       status = null;
       return true;
