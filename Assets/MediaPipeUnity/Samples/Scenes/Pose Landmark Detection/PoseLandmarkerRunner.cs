@@ -158,10 +158,20 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
         }
       }
     }
+    
+    [SerializeField] private CrouchDetector crouchDetector;
 
     private void OnPoseLandmarkDetectionOutput(PoseLandmarkerResult result, Image image, long timestamp)
     {
       _poseLandmarkerResultAnnotationController.DrawLater(result);
+
+      // Check if user is crouching
+      bool isCrouching = crouchDetector.IsCrouched(result);
+      if (isCrouching)
+      {
+        Debug.LogWarning("Player is crouched!");
+      }
+
       DisposeAllMasks(result);
     }
 
