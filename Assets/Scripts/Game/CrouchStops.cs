@@ -41,6 +41,21 @@ namespace Mudatti.Game
     public int CatsCollected => startingCats + _nextStop + (_collected ? 1 : 0);
     public int CatsTotal => startingCats + stopPoints.Length;
 
+    /// <summary>The stop point (cat) the character is stopped at, including its stand-up; null while walking.</summary>
+    public Transform CurrentStopPoint
+    {
+      get
+      {
+        if (_stopOrder == null || !(_atStop || _standingUp))
+        {
+          return null;
+        }
+        // While standing up, _nextStop has already moved on to the following stop.
+        var index = _standingUp ? _nextStop - 1 : _nextStop;
+        return index >= 0 && index < _stopOrder.Length ? _stopOrder[index] : null;
+      }
+    }
+
     private void OnEnable()
     {
       tracker.CheckpointCompleted += OnCheckpointCompleted;
