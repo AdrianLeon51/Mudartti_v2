@@ -34,7 +34,5 @@ namespace Mudatti.UI
       settingsPanel.SetActive(false);
       mainButtons.SetActive(true);
     }
-
-    public void Quit() => GameFlow.Quit();
   }
 }

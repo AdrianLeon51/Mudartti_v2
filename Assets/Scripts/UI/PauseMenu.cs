@@ -3,51 +3,55 @@ using UnityEngine;
 
 namespace Mudatti.UI
 {
-  /// <summary>
-  ///   Freezes the game (Time.timeScale = 0) and shows the pause panel. Hook the buttons' onClick to
-  ///   <see cref="Pause"/>, <see cref="Resume"/> and <see cref="Quit"/>.
-  /// </summary>
-  public class PauseMenu : MonoBehaviour
-  {
-    [SerializeField] private GameObject pauseButton;
-    [SerializeField] private GameObject pausePanel;
-
-    public bool IsPaused { get; private set; }
-
-    private void Awake()
+    /// <summary>
+    ///   Freezes the game (Time.timeScale = 0) and shows the pause panel. Hook the buttons' onClick to
+    ///   <see cref="Pause"/>, <see cref="Resume"/> and <see cref="Quit"/>.
+    /// </summary>
+    public class PauseMenu : MonoBehaviour
     {
-      pausePanel.SetActive(false);
-    }
+        [SerializeField] private GameObject pauseButton;
+        [SerializeField] private GameObject pausePanel;
 
-    public void Pause()
-    {
-      IsPaused = true;
-      Time.timeScale = 0f;
-      pausePanel.SetActive(true);
-      // Hidden so the hand cursor resting on it can't trigger it again.
-      pauseButton.SetActive(false);
-    }
+        public bool IsPaused { get; private set; }
 
-    public void Resume()
-    {
-      IsPaused = false;
-      Time.timeScale = 1f;
-      pausePanel.SetActive(false);
-      pauseButton.SetActive(true);
-    }
+        private void Awake()
+        {
+            pausePanel.SetActive(false);
+        }
 
-    public void Quit()
-    {
-      Time.timeScale = 1f;
-      GameFlow.Quit();
-    }
+        public void Pause()
+        {
+            IsPaused = true;
+            Time.timeScale = 0f;
+            pausePanel.SetActive(true);
+            // Hidden so the hand cursor resting on it can't trigger it again.
+            pauseButton.SetActive(false);
+        }
 
-    private void OnDestroy()
-    {
-      if (IsPaused)
-      {
-        Time.timeScale = 1f;
-      }
+        public void Resume()
+        {
+            IsPaused = false;
+            Time.timeScale = 1f;
+            pausePanel.SetActive(false);
+            pauseButton.SetActive(true);
+        }
+
+        public void Quit()
+        {
+            Time.timeScale = 1f;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
+        }
+
+        private void OnDestroy()
+        {
+            if (IsPaused)
+            {
+                Time.timeScale = 1f;
+            }
+        }
     }
-  }
 }

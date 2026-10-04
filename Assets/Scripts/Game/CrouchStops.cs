@@ -1,8 +1,10 @@
 using System;
 using Mudatti.Posture;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
+using UnityEngine.UI;
 
 namespace Mudatti.Game
 {
@@ -38,9 +40,15 @@ namespace Mudatti.Game
     private bool _standingUp;
     private bool _collected;
 
-    public int CatsCollected => startingCats + _nextStop + (_collected ? 1 : 0);
+    public int fallingCats = 0;
+    public int CatsCollected => startingCats + _nextStop + (_collected ? 1 : 0) - fallingCats;
     public int CatsTotal => startingCats + stopPoints.Length;
 
+    public bool NoMoreCats => transform.childCount == 0;
+    
+    [SerializeField] private GameObject finalText;
+    [SerializeField] private Text resultTextMesh;
+    
     private void OnEnable()
     {
       tracker.CheckpointCompleted += OnCheckpointCompleted;
@@ -121,6 +129,6 @@ namespace Mudatti.Game
       walker.enabled = true;
     }
 
-    private void Finish() => GameFlow.Quit();
+    private void Finish() => GameFlow.Quit(this, finalText, resultTextMesh);
   }
 }

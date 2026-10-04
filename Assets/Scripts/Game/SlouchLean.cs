@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Mediapipe.Tasks.Vision.PoseLandmarker;
 using Mudatti.Posture;
 using UnityEngine;
 
@@ -9,6 +11,8 @@ namespace Mudatti.Game
   /// </summary>
   public class SlouchLean : MonoBehaviour
   {
+    [SerializeField] CatPile catPile;
+    
     private static readonly int SlouchingParam = Animator.StringToHash("Slouching");
 
     [SerializeField] private PostureTracker tracker;
@@ -21,6 +25,9 @@ namespace Mudatti.Game
     [Tooltip("Put the tracker in Running mode on start so slouching is scored.")]
     [SerializeField] private bool setRunningOnStart = true;
 
+    private float slouchTimer = 0f;
+    private const float CatLossInterval = 5f;
+    
     public bool IsLeaning { get; private set; }
     /// <summary>Slouch percentage at which the character switches to the sad walk and slows down.</summary>
     public float SlouchThreshold => slouchThreshold;
@@ -45,11 +52,18 @@ namespace Mudatti.Game
 
       if (IsLeaning)
       {
-        //starts losing cats each 2 seconds
+        // Accumulate timer while slouching
+        slouchTimer += Time.deltaTime;
+        if (slouchTimer >= CatLossInterval)
+        {
+          slouchTimer = 0f; // Reset timer for the next 5 seconds
+          catPile.LoseCat();
+        }
       }
       else
       {
-        //stop losing cats
+        // Reset timer immediately when posture is corrected
+        slouchTimer = 0f;
       }
     }
   }
