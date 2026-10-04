@@ -42,6 +42,15 @@ namespace Mudatti.Game
       {
         walker.SpeedMultiplier = IsLeaning ? slouchSpeedFactor : 1f;
       }
+
+      if (IsLeaning)
+      {
+        //starts losing cats each 2 seconds
+      }
+      else
+      {
+        //stop losing cats
+      }
     }
   }
 }

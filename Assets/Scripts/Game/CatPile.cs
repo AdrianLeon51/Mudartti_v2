@@ -40,11 +40,18 @@ namespace Mudatti.Game
         basePosition /= startingCats.Length;
       }
       var baseRotation = startingCats.Length > 0 ? startingCats[0].localRotation : Quaternion.identity;
+      
+      Vector3 targetLocalPos = basePosition + new Vector3(side * sideOffset, layer * layerHeight, 0f) / scale;
+      Vector3 targetWorldPos = transform.TransformPoint(targetLocalPos);
+      cat.SetParent(transform, true);
 
-      cat.SetParent(transform, false);
-      cat.localPosition = basePosition + new Vector3(side * sideOffset, layer * layerHeight, 0f) / scale;
-      cat.localRotation = Quaternion.Euler(0f, Random.Range(-yawJitter, yawJitter), 0f) * baseRotation;
-      cat.localScale = Vector3.one * (catScale / scale);
+      CatAnim catAnim = cat.GetComponent<CatAnim>();
+      catAnim.ExecuteJumpAnimationForCat(cat, targetWorldPos, baseRotation, scale, catScale, yawJitter);
+      
+      // cat.SetParent(transform, false);
+      // cat.localPosition = basePosition + new Vector3(side * sideOffset, layer * layerHeight, 0f) / scale;
+      // cat.localRotation = Quaternion.Euler(0f, Random.Range(-yawJitter, yawJitter), 0f) * baseRotation;
+      // cat.localScale = Vector3.one * (catScale / scale);
     }
   }
 }
