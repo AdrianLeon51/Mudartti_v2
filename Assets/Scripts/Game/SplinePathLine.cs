@@ -15,6 +15,8 @@ namespace Mudatti.Game
     [SerializeField] private float samplesPerMetre = 2f;
     [Tooltip("Lift above the ground to avoid z-fighting.")]
     [SerializeField] private float heightOffset = 0.02f;
+    [Tooltip("Drape the line over the terrain instead of following the spline's height.")]
+    [SerializeField] private bool snapToTerrain;
 
     private LineRenderer _line;
 
@@ -56,6 +58,10 @@ namespace Mudatti.Game
       for (var i = 0; i < count; i++)
       {
         Vector3 p = container.EvaluatePosition(i / (float)(count - 1));
+        if (snapToTerrain)
+        {
+          p.y = SplineWalker.TerrainHeight(p, p.y);
+        }
         _line.SetPosition(i, p + Vector3.up * heightOffset);
       }
     }

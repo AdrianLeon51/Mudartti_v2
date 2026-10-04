@@ -839,7 +839,7 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2450035628093797817}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.15}
+  m_AnchorMin: {x: 0, y: 0.7}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -10, y: -10}
@@ -1486,6 +1486,8 @@ MonoBehaviour:
   catRoot: {fileID: 3968274597435195638}
   catText: {fileID: 5854544423796603607}
   meterRoot: {fileID: 7066691268557657132}
+  thresholdPosition: 0.7
+  blueZone: {fileID: 2379074819497832752}
   redZone: {fileID: 8002541933016213114}
   ball: {fileID: 7423182392835464423}
   ballImage: {fileID: 3211271923774965981}
@@ -2396,7 +2398,7 @@ RectTransform:
   m_Father: {fileID: 2450035628093797817}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 0.7}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -10, y: -10}
   m_Pivot: {x: 0.5, y: 0.5}

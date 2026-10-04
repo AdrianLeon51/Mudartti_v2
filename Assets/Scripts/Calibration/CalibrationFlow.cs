@@ -29,6 +29,12 @@ namespace Mudatti.Calibration
     private State _state;
     private float _countdownEndTime;
 
+    // Hidden before OnEnable so it stays hidden even if wiring below fails; shown only in OnCalibrated.
+    private void Awake()
+    {
+      playButton.gameObject.SetActive(false);
+    }
+
     private void OnEnable()
     {
       startButton.onClick.AddListener(OnStartPressed);

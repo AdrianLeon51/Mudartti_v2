@@ -6,7 +6,8 @@ using UnityEngine.UI;
 namespace Mudatti.UI
 {
   /// <summary>
-  ///   Gameplay HUD: path progress, collected cats and the slouch meter. Gameplay references left empty
+  ///   Gameplay HUD: path progress, collected cats and the slouch meter. The meter is blue below the slouch
+  ///   threshold and red above it, with the threshold at a fixed height. Gameplay references left empty
   ///   are looked up in the scene, and a widget whose source is missing is hidden.
   /// </summary>
   public class GameHud : MonoBehaviour
@@ -29,7 +30,11 @@ namespace Mudatti.UI
 
     [Header("Slouch meter")]
     [SerializeField] private GameObject meterRoot;
-    [Tooltip("Spans from the threshold to the top of the meter.")]
+    [Tooltip("Fraction of the meter (from the bottom) that is blue; the threshold sits at this height.")]
+    [SerializeField, Range(0.05f, 0.95f)] private float thresholdPosition = 0.7f;
+    [Tooltip("Spans from the bottom of the meter to the threshold position.")]
+    [SerializeField] private RectTransform blueZone;
+    [Tooltip("Spans from the threshold position to the top of the meter.")]
     [SerializeField] private RectTransform redZone;
     [SerializeField] private RectTransform ball;
     [SerializeField] private Image ballImage;
@@ -75,9 +80,10 @@ namespace Mudatti.UI
     {
       // Without a SlouchLean in the scene, fall back to the detector's own threshold.
       var threshold = slouchLean != null ? slouchLean.SlouchThreshold : tracker.Slouch.SlouchThreshold;
-      redZone.anchorMin = new Vector2(redZone.anchorMin.x, Mathf.Clamp01(threshold / 100f));
+      blueZone.anchorMax = new Vector2(blueZone.anchorMax.x, thresholdPosition);
+      redZone.anchorMin = new Vector2(redZone.anchorMin.x, thresholdPosition);
 
-      var target = Mathf.Clamp01(tracker.SlouchPercent / 100f);
+      var target = MeterPosition(tracker.SlouchPercent, threshold, BallSplit());
       var alpha = ballSmoothingSeconds > 0f ? 1f - Mathf.Exp(-Time.unscaledDeltaTime / ballSmoothingSeconds) : 1f;
       _ballValue = Mathf.Lerp(_ballValue, target, alpha);
       SetAnchorY(ball, _ballValue);
@@ -85,6 +91,32 @@ namespace Mudatti.UI
       var color = ballImage.color;
       color.a = tracker.IsSlouchActive ? 1f : inactiveBallAlpha;
       ballImage.color = color;
+    }
+
+    /// <summary>
+    ///   Maps a slouch percentage onto the meter: 0..threshold fills the blue part up to <paramref name="split" />,
+    ///   threshold..100 fills the red part above it.
+    /// </summary>
+    public static float MeterPosition(float percent, float threshold, float split)
+    {
+      threshold = Mathf.Clamp(threshold, 0.01f, 99.99f);
+      return percent <= threshold
+        ? Mathf.Lerp(0f, split, percent / threshold)
+        : Mathf.Lerp(split, 1f, (percent - threshold) / (100f - threshold));
+    }
+
+    /// <summary>
+    ///   The blue/red boundary in the ball's own range. The ball travels in a smaller area than the zones,
+    ///   so the boundary is converted to keep the ball on the colour line exactly at the threshold.
+    /// </summary>
+    private float BallSplit()
+    {
+      var area = (RectTransform)ball.parent;
+      var corners = new Vector3[4];
+      redZone.GetWorldCorners(corners);
+      var boundaryY = area.InverseTransformPoint(corners[0]).y;
+      var rect = area.rect;
+      return rect.height > 0f ? Mathf.Clamp01(Mathf.InverseLerp(rect.yMin, rect.yMax, boundaryY)) : thresholdPosition;
     }
 
     private static void SetAnchorX(RectTransform rect, float x)

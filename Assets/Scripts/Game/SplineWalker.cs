@@ -13,6 +13,8 @@ namespace Mudatti.Game
     [SerializeField] private float speed = 2f;
     [Tooltip("How quickly the speed eases toward a new SpeedMultiplier.")]
     [SerializeField] private float speedChangeSeconds = 0.3f;
+    [Tooltip("Keep the character on the terrain surface between knots instead of following the spline's height.")]
+    [SerializeField] private bool snapToTerrain;
 
     private float _currentMultiplier = 1f;
 
@@ -41,7 +43,12 @@ namespace Mudatti.Game
     private void Place()
     {
       var t = path.Spline.ConvertIndexUnit(Distance, PathIndexUnit.Distance, PathIndexUnit.Normalized);
-      transform.position = path.EvaluatePosition(t);
+      Vector3 position = path.EvaluatePosition(t);
+      if (snapToTerrain)
+      {
+        position.y = TerrainHeight(position, position.y);
+      }
+      transform.position = position;
 
       // Yaw only, so the character stays upright and its lean pivot still tilts "forward".
       Vector3 forward = path.EvaluateTangent(t);
@@ -50,6 +57,22 @@ namespace Mudatti.Game
       {
         transform.rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
       }
+    }
+
+    /// <summary>Height of the terrain tile under <paramref name="position" />, or the fallback off-terrain.</summary>
+    public static float TerrainHeight(Vector3 position, float fallback)
+    {
+      foreach (var terrain in Terrain.activeTerrains)
+      {
+        var origin = terrain.transform.position;
+        var size = terrain.terrainData.size;
+        if (position.x >= origin.x && position.x <= origin.x + size.x &&
+            position.z >= origin.z && position.z <= origin.z + size.z)
+        {
+          return terrain.SampleHeight(position) + origin.y;
+        }
+      }
+      return fallback;
     }
   }
 }

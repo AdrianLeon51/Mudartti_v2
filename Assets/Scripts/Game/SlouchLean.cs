@@ -4,24 +4,25 @@ using UnityEngine;
 namespace Mudatti.Game
 {
   /// <summary>
-  ///   Tilts the character forward and slows it down while the player is slouching. The tilt is instant
-  ///   on purpose, so the change is obvious while testing.
+  ///   Switches the character to its sad walk and slows it down while the player is slouching. The switch
+  ///   is immediate on purpose, so the change is obvious while testing.
   /// </summary>
   public class SlouchLean : MonoBehaviour
   {
+    private static readonly int SlouchingParam = Animator.StringToHash("Slouching");
+
     [SerializeField] private PostureTracker tracker;
-    [Tooltip("Optional; slowed down while leaning.")]
+    [Tooltip("Optional; slowed down while slouching.")]
     [SerializeField] private SplineWalker walker;
     [SerializeField, Range(0.1f, 1f)] private float slouchSpeedFactor = 0.6f;
-    [Tooltip("Rotated around X; place it at the character's feet.")]
-    [SerializeField] private Transform leanPivot;
+    [Tooltip("The character's animator; needs a \"Slouching\" bool parameter.")]
+    [SerializeField] private Animator animator;
     [SerializeField, Range(0f, 100f)] private float slouchThreshold = 15f;
-    [SerializeField] private float leanAngle = 45f;
     [Tooltip("Put the tracker in Running mode on start so slouching is scored.")]
     [SerializeField] private bool setRunningOnStart = true;
 
     public bool IsLeaning { get; private set; }
-    /// <summary>Slouch percentage at which the character leans and slows down.</summary>
+    /// <summary>Slouch percentage at which the character switches to the sad walk and slows down.</summary>
     public float SlouchThreshold => slouchThreshold;
 
     private void Start()
@@ -34,9 +35,9 @@ namespace Mudatti.Game
 
     private void Update()
     {
-      // While slouch scoring is paused (crouching, settling, tracking lost) the character stays upright.
+      // While slouch scoring is paused (crouching, settling, tracking lost) the character walks normally.
       IsLeaning = tracker.IsSlouchActive && tracker.SlouchPercent > slouchThreshold;
-      leanPivot.localRotation = Quaternion.Euler(IsLeaning ? leanAngle : 0f, 0f, 0f);
+      animator.SetBool(SlouchingParam, IsLeaning);
       if (walker != null)
       {
         walker.SpeedMultiplier = IsLeaning ? slouchSpeedFactor : 1f;

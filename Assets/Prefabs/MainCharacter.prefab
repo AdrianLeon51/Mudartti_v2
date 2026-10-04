@@ -96,6 +96,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3310203781217553215, guid: 116c5ccac2119014ea9d43028fb9ff73, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.size
+      value: 29
+      objectReference: {fileID: 0}
+    - target: {fileID: 3310203781221807613, guid: 116c5ccac2119014ea9d43028fb9ff73, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: daceb7c0282700540a0b2f7fb042bd21, type: 2}
     - target: {fileID: 3310203781221807613, guid: 116c5ccac2119014ea9d43028fb9ff73, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
