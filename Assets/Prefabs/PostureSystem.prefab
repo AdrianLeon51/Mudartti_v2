@@ -1,0 +1,141 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2774476949866642603
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6188442241157931498}
+  - component: {fileID: 1800343119928465175}
+  - component: {fileID: 3604801572638295733}
+  - component: {fileID: 2175239499615478578}
+  - component: {fileID: 5757711386798256871}
+  - component: {fileID: 3998248007878408079}
+  m_Layer: 0
+  m_Name: PostureSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6188442241157931498
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2774476949866642603}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1800343119928465175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2774476949866642603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d172495cbee41e4d998766a315aa502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PoseLandmarkFeed
+  runner: {fileID: 0}
+--- !u!114 &3604801572638295733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2774476949866642603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39ff969b0d244894490b1fb2f6cf42b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.SlouchDetector
+  feed: {fileID: 1800343119928465175}
+  minVisibility: 0.5
+  requireFullBody: 1
+  maxShoulderDepthRatio: 0.6
+  autoCalibrate: 1
+  calibrationSeconds: 3
+  minCalibrationLegRatio: 1.2
+  maxDelta:
+  - 0.35
+  - 0.1
+  - 0.4
+  - 0.3
+  weights:
+  - 0.4
+  - 0.25
+  - 0.2
+  - 0.15
+  smoothingSeconds: 0.5
+  slouchThreshold: 35
+  slouchHoldSeconds: 2
+  showDebugOverlay: 1
+  showRecalibrateButton: 1
+--- !u!114 &2175239499615478578
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2774476949866642603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9d22cb9416458b489634a81a45dc8f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.CrouchTracker
+  feed: {fileID: 1800343119928465175}
+  minVisibility: 0.5
+  fallbackStandingRatio: 1.7
+  minBaselineRatio: 1.2
+  crouchEnter: 0.6
+  crouchExit: 0.75
+  standEnter: 0.85
+  standExit: 0.8
+  crouchHoldSeconds: 0.15
+  standHoldSeconds: 0.3
+  smoothingSeconds: 0.1
+--- !u!114 &5757711386798256871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2774476949866642603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b44c2bcde6a9f434eb904f00f3c72136, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PostureTracker
+  slouchDetector: {fileID: 3604801572638295733}
+  crouchTracker: {fileID: 2175239499615478578}
+  loadSavedCalibration: 1
+  standSettleSeconds: 0.5
+  checkpointHoldSeconds: 0.3
+  trackingLostSeconds: 1
+--- !u!114 &3998248007878408079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2774476949866642603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1267756e75a17a438d6bc65731bf4fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mudatti.Posture.PostureDebugPanel
+  tracker: {fileID: 5757711386798256871}
+  showModeButtons: 1
+  width: 430

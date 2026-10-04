@@ -28,6 +28,12 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
 
     public readonly PoseLandmarkDetectionConfig config = new PoseLandmarkDetectionConfig();
 
+    /// <summary>
+    ///   Raised for every successful detection. In LIVE_STREAM mode this is invoked on a background thread,
+    ///   and the result is only valid during the call, so listeners must copy what they need.
+    /// </summary>
+    public event System.Action<PoseLandmarkerResult> OnPoseResult;
+
     public override void Stop()
     {
       base.Stop();
@@ -143,6 +149,7 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
             if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
             {
               _poseLandmarkerResultAnnotationController.DrawNow(result);
+              OnPoseResult?.Invoke(result);
             }
             else
             {
@@ -154,6 +161,7 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
             if (taskApi.TryDetectForVideo(image, GetCurrentTimestampMillisec(), imageProcessingOptions, ref result))
             {
               _poseLandmarkerResultAnnotationController.DrawNow(result);
+              OnPoseResult?.Invoke(result);
             }
             else
             {
@@ -173,24 +181,25 @@ namespace Mediapipe.Unity.Sample.PoseLandmarkDetection
     private void OnPoseLandmarkDetectionOutput(PoseLandmarkerResult result, Image image, long timestamp)
     {
       _poseLandmarkerResultAnnotationController.DrawLater(result);
+      OnPoseResult?.Invoke(result);
 
       PlayerState newState = PlayerState.Normal;
-      
-      // Check if user is crouching
-      bool isCrouching = crouchDetector.IsCrouched(result);
-      if (isCrouching)
+
+      // Check if user is crouching. Not every scene assigns a CrouchDetector; a managed null check
+      // is used because this runs on a background thread.
+      if (crouchDetector is not null && crouchDetector.IsCrouched(result))
       {
         newState = PlayerState.Crouched;
         //Debug.LogWarning("Player is crouched!");
       }
-      
+
       //verify leaning
       // if (isLeaning)
       // {
       //   newState = PlayerState.Leaning;
       //   //Debug.LogWarning("Player is Leaning!");
       // }
-      
+
       currentState = newState;
 
       DisposeAllMasks(result);

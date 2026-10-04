@@ -1,0 +1,131 @@
+using Mudatti.Posture;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+namespace Mudatti.Calibration
+{
+  /// <summary>
+  ///   Calibration scene flow: wait for a button press, count down, record the upright posture
+  ///   with <see cref="SlouchDetector"/>, then show the live slouch percentage.
+  /// </summary>
+  public class CalibrationFlow : MonoBehaviour
+  {
+    private enum State { Idle, Countdown, Calibrating, Done }
+
+    [SerializeField] private SlouchDetector slouchDetector;
+    [Tooltip("Optional. Switched to Running after calibration so the live slouch % is scored.")]
+    [SerializeField] private PostureTracker postureTracker;
+    [SerializeField] private Button startButton;
+    [SerializeField] private Text buttonLabel;
+    [SerializeField] private Text instructions;
+    [Tooltip("Shown once calibration succeeds; loads the play scene.")]
+    [SerializeField] private Button playButton;
+    [Tooltip("Must be listed in Build Settings.")]
+    [SerializeField] private string playSceneName = "Adri_WalkTest";
+
+    [SerializeField] private float countdownSeconds = 2f;
+
+    private State _state;
+    private float _countdownEndTime;
+
+    // Hidden before OnEnable so it stays hidden even if wiring below fails; shown only in OnCalibrated.
+    private void Awake()
+    {
+      playButton.gameObject.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+      startButton.onClick.AddListener(OnStartPressed);
+      playButton.onClick.AddListener(OnPlayPressed);
+      slouchDetector.Calibrated += OnCalibrated;
+      EnterIdle();
+    }
+
+    private void OnDisable()
+    {
+      startButton.onClick.RemoveListener(OnStartPressed);
+      playButton.onClick.RemoveListener(OnPlayPressed);
+      slouchDetector.Calibrated -= OnCalibrated;
+    }
+
+    private void OnPlayPressed()
+    {
+      if (_state == State.Done)
+      {
+        SceneManager.LoadScene(playSceneName);
+      }
+    }
+
+    private void OnStartPressed()
+    {
+      if (_state != State.Idle && _state != State.Done)
+      {
+        return;
+      }
+      _state = State.Countdown;
+      _countdownEndTime = Time.time + countdownSeconds;
+      startButton.gameObject.SetActive(false);
+      playButton.gameObject.SetActive(false);
+      if (postureTracker != null)
+      {
+        postureTracker.SetMode(PostureGameMode.Idle);
+      }
+    }
+
+    private void OnCalibrated()
+    {
+      if (_state != State.Calibrating)
+      {
+        return;
+      }
+      _state = State.Done;
+      buttonLabel.text = "Recalibrate";
+      startButton.gameObject.SetActive(true);
+      playButton.gameObject.SetActive(true);
+      if (postureTracker != null)
+      {
+        postureTracker.SetMode(PostureGameMode.Running);
+      }
+    }
+
+    private void EnterIdle()
+    {
+      _state = State.Idle;
+      buttonLabel.text = "Start calibration";
+      startButton.gameObject.SetActive(true);
+      playButton.gameObject.SetActive(false);
+    }
+
+    private void Update()
+    {
+      switch (_state)
+      {
+        case State.Idle:
+          instructions.text = "Raise your hand and hold the cursor over the button";
+          break;
+        case State.Countdown:
+          var remaining = _countdownEndTime - Time.time;
+          if (remaining > 0f)
+          {
+            instructions.text = $"Lower your arms and stand up straight...\n{Mathf.CeilToInt(remaining)}";
+          }
+          else
+          {
+            _state = State.Calibrating;
+            slouchDetector.StartCalibration();
+          }
+          break;
+        case State.Calibrating:
+          instructions.text = slouchDetector.IsCalibrating && slouchDetector.CalibrationProgress > 0f
+            ? $"Calibrating... hold still ({slouchDetector.CalibrationProgress * 100f:0}%)"
+            : $"Calibrating... {slouchDetector.Status}";
+          break;
+        case State.Done:
+          instructions.text = $"Calibration complete\nSlouch: {slouchDetector.SlouchPercent:0}%";
+          break;
+      }
+    }
+  }
+}
