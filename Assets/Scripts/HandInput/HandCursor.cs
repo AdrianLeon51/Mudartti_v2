@@ -48,6 +48,8 @@ namespace Mudatti.Interaction
     private float _dwellElapsed;
 
     public bool IsActive => _hand != NoHand;
+    /// <summary>Whether a person is currently detected, raised hand or not.</summary>
+    public bool HasPose { get; private set; }
     public Vector2 ScreenPosition => _screenPosition;
 
     private void OnEnable()
@@ -73,6 +75,7 @@ namespace Mudatti.Interaction
 
     private void HandleFrame(PoseFrame frame)
     {
+      HasPose = frame.HasPose;
       _hand = frame.HasPose ? PickHand(frame) : NoHand;
       if (_hand == NoHand)
       {
@@ -121,14 +124,25 @@ namespace Mudatti.Interaction
     private int PickHand(PoseFrame frame)
     {
       bool Visible(int i) => frame.IsVisible(i, minVisibility);
-      if (!Visible(LeftShoulder) || !Visible(RightShoulder) || !Visible(LeftHip) || !Visible(RightHip))
+      if (!Visible(LeftShoulder) || !Visible(RightShoulder))
       {
         return NoHand;
       }
 
-      var hipY = (frame.Pixel[LeftHip].y + frame.Pixel[RightHip].y) * 0.5f;
-      var leftRaised = Visible(LeftWrist) && HandPoint(frame, LeftHand).y < hipY;
-      var rightRaised = Visible(RightWrist) && HandPoint(frame, RightHand).y < hipY;
+      // Hands count as raised above the hips; when standing close the hips are out of frame,
+      // so a line one shoulder width below the shoulders is used instead.
+      float raiseLineY;
+      if (Visible(LeftHip) && Visible(RightHip))
+      {
+        raiseLineY = (frame.Pixel[LeftHip].y + frame.Pixel[RightHip].y) * 0.5f;
+      }
+      else
+      {
+        var shoulderY = (frame.Pixel[LeftShoulder].y + frame.Pixel[RightShoulder].y) * 0.5f;
+        raiseLineY = shoulderY + Vector2.Distance(frame.Pixel[LeftShoulder], frame.Pixel[RightShoulder]);
+      }
+      var leftRaised = Visible(LeftWrist) && HandPoint(frame, LeftHand).y < raiseLineY;
+      var rightRaised = Visible(RightWrist) && HandPoint(frame, RightHand).y < raiseLineY;
 
       // Keep the current hand while it stays raised; otherwise take the higher one.
       if (_hand == LeftHand && leftRaised) return LeftHand;

@@ -41,25 +41,36 @@ namespace Mudatti.Posture
     private bool _hasNewFrame;
     private bool _sharedHasPose;
 
+    private bool _subscribed;
+
     private void OnEnable()
     {
-      if (runner == null)
-      {
-        // Lets the PostureSystem prefab be dropped into any pose scene without wiring.
-        runner = FindFirstObjectByType<PoseLandmarkerRunner>();
-      }
-      if (runner != null)
-      {
-        runner.OnPoseResult += HandlePoseResult;
-      }
+      TrySubscribe();
     }
 
     private void OnDisable()
     {
-      if (runner != null)
+      if (_subscribed && runner != null)
       {
         runner.OnPoseResult -= HandlePoseResult;
       }
+      _subscribed = false;
+    }
+
+    private void TrySubscribe()
+    {
+      if (runner == null)
+      {
+        // Lets the feed be dropped into any pose scene without wiring.
+        runner = FindFirstObjectByType<PoseLandmarkerRunner>();
+      }
+      if (runner == null)
+      {
+        return;
+      }
+      runner.OnPoseResult += HandlePoseResult;
+      _subscribed = true;
+      Debug.Log($"PoseLandmarkFeed connected to runner '{runner.name}'", this);
     }
 
     // May run on a background thread (LIVE_STREAM), so only copy data here.
@@ -89,6 +100,11 @@ namespace Mudatti.Posture
 
     private void Update()
     {
+      if (!_subscribed)
+      {
+        TrySubscribe();
+      }
+
       // Normalized image coords are scaled per axis, so convert to pixels before comparing distances.
       var source = ImageSourceProvider.ImageSource;
       var width = source != null && source.textureWidth > 0 ? source.textureWidth : 1f;
