@@ -76,10 +76,13 @@ namespace Mudatti.Game
       Array.Sort(_stopDistances, _stopOrder);
     }
 
+    [SerializeField] private AudioSource stepAudioSource;
     private void Update()
     {
       if (!_atStop && _nextStop < _stopDistances.Length && walker.Distance >= _stopDistances[_nextStop])
       {
+        stepAudioSource.volume = 0;
+
         _atStop = true;
         _collected = false;
         walker.enabled = false;
@@ -118,6 +121,7 @@ namespace Mudatti.Game
         return;
       }
       // Stay put until the stand-up animation has played, so the character doesn't slide while rising.
+      stepAudioSource.volume = 1;
       _standingUp = true;
       Invoke(nameof(WalkOn), standUpSeconds);
     }

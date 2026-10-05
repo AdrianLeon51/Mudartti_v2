@@ -63,6 +63,7 @@ namespace Mudatti.Game
 
             CatAnim catAnim = cat.GetComponent<CatAnim>();
             catAnim.ExecuteJumpAnimationForCat(cat, targetWorldPos, baseRotation, scale, catScale, yawJitter);
+            RandomCatNoise(true);
 
             // cat.SetParent(transform, false);
             // cat.localPosition = basePosition + new Vector3(side * sideOffset, layer * layerHeight, 0f) / scale;
@@ -73,7 +74,7 @@ namespace Mudatti.Game
         [SerializeField] GameObject basket;
         [SerializeField] CrouchStops crouchStops;
         [SerializeField] GameObject player;
-        
+
         [SerializeField] private GameObject finalText;
         [SerializeField] private Text resultTextMesh;
 
@@ -121,7 +122,7 @@ namespace Mudatti.Game
                 fallingCat.transform.DOPath(waypoints, 1.2f, PathType.CatmullRom)
                     .SetEase(Ease.OutQuad)
                     .OnComplete(() => { Destroy(fallingCat); });
-                
+
                 audioSource.PlayOneShot(catFallSound);
             }
         }
@@ -132,13 +133,17 @@ namespace Mudatti.Game
         }
 
         [SerializeField] private List<AudioClip> catSounds;
-        public void RandomCatNoise()
+
+        public void RandomCatNoise(bool doItAnyway = false)
         {
-            bool doIt = Random.Range(0, 1000) == 1;
-            
-            if (!doIt)
-                return;
-            
+            if (!doItAnyway)
+            {
+                bool doIt = Random.Range(0, 1000) == 1;
+
+                if (!doIt)
+                    return;
+            }
+
             int random = Random.Range(0, 4);
             audioSource.PlayOneShot(catSounds[random]);
         }

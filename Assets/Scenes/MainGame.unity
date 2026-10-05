@@ -859,6 +859,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 376bf1396edeb2845bece7f8de604d59, type: 3}
+--- !u!82 &225451955 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 1628251125370186651, guid: 376bf1396edeb2845bece7f8de604d59, type: 3}
+  m_PrefabInstance: {fileID: 225451954}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &234311054
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3906,7 +3911,7 @@ MonoBehaviour:
   walker: {fileID: 1348637464}
   slouchSpeedFactor: 0.2
   animator: {fileID: 6338473242235014018}
-  slouchThreshold: 1
+  slouchThreshold: 5
   setRunningOnStart: 1
 --- !u!4 &1348637462
 Transform:
@@ -3951,6 +3956,7 @@ MonoBehaviour:
   fallingCats: 0
   finalText: {fileID: 296105990}
   resultTextMesh: {fileID: 2093229284}
+  stepAudioSource: {fileID: 225451955}
 --- !u!114 &1348637464
 MonoBehaviour:
   m_ObjectHideFlags: 0
